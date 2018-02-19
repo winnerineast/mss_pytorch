@@ -2,10 +2,13 @@
 __author__ = 'J.F. Santos, K. Drossos'
 
 import torch
+from losses import loss_functions
+
 
 def iterative_inference(module, x, criterion=None, tol=1e-9, max_iter=10):
     if criterion is None:
-        criterion = torch.nn.functional.mse_loss
+        criterion = loss_functions.mse
+
     y0 = module(x)
     for k in range(max_iter):
         y = module(y0)
@@ -16,13 +19,13 @@ def iterative_inference(module, x, criterion=None, tol=1e-9, max_iter=10):
     return y, k
 
 
-def iterative_recurrent_inference(module, H_enc, X_in, criterion=None, tol=1e-9, max_iter=10):
+def iterative_recurrent_inference(module, H_enc, criterion=None, tol=1e-9, max_iter=10):
     if criterion is None:
-        criterion = torch.nn.functional.mse_loss
+        criterion = loss_functions.mse
 
-    y0 = module(H_enc, X_in*1.)
+    y0 = module(H_enc)
     for iter in range(max_iter):
-        y = module(y0, X_in*0.)
+        y = module(y0)
         if criterion(y0, y).data[0] < tol:
             break
         else:
